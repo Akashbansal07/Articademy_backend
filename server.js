@@ -35,23 +35,13 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration
-const allowedOrigins = [
-  'https://articademy-frontend.vercel.app',
-  'http://localhost:3000'
-];
-
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: process.env.FRONTEND_URL,
   credentials: true,
   optionsSuccessStatus: 200
 };
 
+app.use(cors(corsOptions));
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
