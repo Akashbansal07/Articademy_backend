@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://akashbansal:akashwohoo@cluster0.agepvdj.mongodb.net/jobportal';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 async function migrateJobs() {
   try {
