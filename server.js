@@ -34,11 +34,35 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter);
 
-// CORS configuration
+// CORS configuration - Fixed for production
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://articademy-frontend.vercel.app',
+      'https://articademy.vercel.app'
+    ];
+    
+    // Remove trailing slash from origin if present
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      callback(null, true);
+    } else if (process.env.NODE_ENV === 'development') {
+      // In development, allow any origin
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
@@ -49,6 +73,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI is not defined in environment variables');
+  console.error('Please set MONGODB_URI in your .env file or environment variables');
+  process.exit(1);
+}
 
 console.log('Connecting to MongoDB...');
 mongoose.connect(MONGODB_URI, {
@@ -62,7 +92,8 @@ mongoose.connect(MONGODB_URI, {
   initializeJobStatusCron();
 })
 .catch((error) => {
-  console.error('❌ MongoDB connection error:', error);
+  console.error('❌ MongoDB connection error:', error.message);
+  console.error('Please check your MONGODB_URI and network connection');
   process.exit(1);
 });
 

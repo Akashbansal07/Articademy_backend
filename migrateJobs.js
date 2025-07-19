@@ -7,6 +7,12 @@ require('dotenv').config();
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI;
 
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI is not defined in environment variables');
+  console.error('Please set MONGODB_URI in your .env file');
+  process.exit(1);
+}
+
 async function migrateJobs() {
   try {
     console.log('Connecting to MongoDB...');
